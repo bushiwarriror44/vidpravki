@@ -1,0 +1,16 @@
+# Запуск бекенда в Docker с фронтендом (собранным внутри образа).
+# Использование: docker compose -f docker-compose.standalone.yaml up -d
+# Сайт: http://<IP>:3914
+
+services:
+  website:
+    build: .
+    image: vidpravki
+    restart: always
+    container_name: vidpravki
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "3914:3914"

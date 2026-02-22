@@ -1,0 +1,2794 @@
+{% extends 'base.html' %} {% block title %}Админ Панель{% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="/admin-static/css/admin-panel.css" />
+<style>
+	.add-button-form {
+		background: #ffffff;
+		border: none;
+		border-radius: 8px;
+		padding: 16px;
+		margin-bottom: 20px;
+	}
+
+	.add-button-form h4 {
+		margin: 0 0 12px 0;
+		font-size: 14px;
+		font-weight: 600;
+		color: #111827;
+	}
+
+	.form-row {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		gap: 12px;
+		align-items: end;
+	}
+
+	.contacts-form {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 12px;
+	}
+
+	.contacts-form .full-width {
+		grid-column: span 2;
+	}
+</style>
+{% endblock %} {% block body %}
+<header class="admin-header">
+	<div class="header-content">
+		<h1 class="admin-title">Панель управления</h1>
+		<div class="header-actions">
+			<a href="/admin/logout" class="btn-logout">
+				<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+					/>
+				</svg>
+				<span>Выйти</span>
+			</a>
+		</div>
+	</div>
+</header>
+
+<div class="tabs-container">
+	<div class="tabs-nav">
+		<button class="tab-button" onclick="switchTab('shipments')">
+			<svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+				/>
+			</svg>
+			Отправки
+		</button>
+		<button class="tab-button" onclick="switchTab('wholesale')">
+			<svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+				/>
+			</svg>
+			Опт кладами
+		</button>
+		<button class="tab-button" onclick="switchTab('promotions')">
+			<svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+			Акции и предложения
+		</button>
+		<button class="tab-button active" onclick="switchTab('stats')">
+			<svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+				/>
+			</svg>
+			Статистика
+		</button>
+	</div>
+
+	<div id="shipments-tab" class="tab-content">
+		<div class="settings-container">
+			<div class="settings-header">
+				<h3>Отправки</h3>
+				<p>Управление контентом страницы "Отправки"</p>
+			</div>
+			<div class="settings-section">
+				<div class="form-group">
+					<label for="shipments-top-text" class="form-label">Верхний текст</label>
+					<textarea
+						id="shipments-top-text"
+						class="form-input"
+						rows="5"
+						placeholder="Введите текст..."
+					></textarea>
+				</div>
+				<div class="form-group">
+					<label for="shipments-bottom-text" class="form-label">Нижний текст</label>
+					<textarea
+						id="shipments-bottom-text"
+						class="form-input"
+						rows="5"
+						placeholder="Введите текст..."
+					></textarea>
+				</div>
+				<div class="form-group">
+					<label class="form-label">Товары</label>
+					<div id="shipments-products-list" class="links-list"></div>
+					<button type="button" class="btn-save" onclick="addShipmentsProduct()" style="margin-top: 12px;">
+						+ Добавить товар
+					</button>
+				</div>
+				<div class="form-actions">
+					<button type="button" class="btn-save" onclick="saveShipmentsPage()">
+						Сохранить страницу
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="wholesale-tab" class="tab-content">
+		<div class="settings-container">
+			<div class="settings-header">
+				<h3>Опт кладами</h3>
+				<p>Управление контентом страницы "Опт кладами"</p>
+			</div>
+			<div class="settings-section">
+				<div class="form-group">
+					<label for="wholesale-top-text" class="form-label">Верхний текст</label>
+					<textarea
+						id="wholesale-top-text"
+						class="form-input"
+						rows="5"
+						placeholder="Введите текст..."
+					></textarea>
+				</div>
+				<div class="form-group">
+					<label for="wholesale-bottom-text" class="form-label">Нижний текст</label>
+					<textarea
+						id="wholesale-bottom-text"
+						class="form-input"
+						rows="5"
+						placeholder="Введите текст..."
+					></textarea>
+				</div>
+				<div class="form-group">
+					<label class="form-label">Товары</label>
+					<div id="wholesale-products-list" class="links-list"></div>
+					<button type="button" class="btn-save" onclick="addWholesaleProduct()" style="margin-top: 12px;">
+						+ Добавить товар
+					</button>
+				</div>
+				<div class="form-actions">
+					<button type="button" class="btn-save" onclick="saveWholesalePage()">
+						Сохранить страницу
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="promotions-tab" class="tab-content">
+		<div class="settings-container">
+			<div class="settings-header">
+				<h3>Акции и предложения</h3>
+				<p>Управление контентом страницы "Акции и предложения"</p>
+			</div>
+			<div class="settings-section">
+				<div class="form-group">
+					<label for="promotions-text" class="form-label">Текст</label>
+					<textarea
+						id="promotions-text"
+						class="form-input"
+						rows="5"
+						placeholder="Введите текст..."
+					></textarea>
+				</div>
+				<div class="form-group">
+					<label class="form-label">Изображение</label>
+					<div
+						id="promotions-image-upload-area"
+						class="dropzone"
+						ondrop="handlePromotionsImageDrop(event)"
+						ondragover="handlePromotionsImageDragOver(event)"
+						ondragleave="handlePromotionsImageDragLeave(event)"
+						onclick="document.getElementById('promotions-image-file-input').click()"
+					>
+						<input
+							type="file"
+							id="promotions-image-file-input"
+							accept="image/*"
+							style="display: none"
+							onchange="handlePromotionsImageFileSelect(event)"
+						/>
+						<div id="promotions-image-upload-content" class="dropzone-content">
+							<svg class="dropzone-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+							</svg>
+							<p>Перетащите изображение сюда или <span class="dropzone-link">выберите файл</span></p>
+						</div>
+						<div id="promotions-image-preview" style="display: none;">
+							<img id="promotions-image-preview-img" src="" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 8px;" />
+							<button type="button" onclick="clearPromotionsImagePreview()" class="btn-remove" style="margin-top: 8px;">
+								Удалить изображение
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="form-label">Товары из прайса</label>
+					<div id="promotions-products-list" class="links-list"></div>
+					<button type="button" class="btn-save" onclick="addPromotionProduct()" style="margin-top: 12px;">
+						+ Добавить товар в прайс
+					</button>
+				</div>
+				<div class="form-actions">
+					<button type="button" class="btn-save" onclick="savePromotionsPage()">
+						Сохранить страницу
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="stats-tab" class="tab-content active">
+		<div class="settings-container">
+			<div class="settings-header">
+				<h3>Статистика (Umami)</h3>
+			</div>
+			<div class="settings-section">
+				<h4 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600; color: #111827">
+					Настройки Umami
+				</h4>
+				<p style="margin: 0 0 16px 0; font-size: 14px; color: #6b7280">
+					Укажите API Key из панели Umami (Profile → API Keys → Create API Key) и Website ID (из
+					кода счётчика на сайте).
+				</p>
+				<div class="form-group">
+					<label class="form-label">API Key</label>
+					<input
+						type="password"
+						id="umami-api-key"
+						class="form-input"
+						placeholder="Вставьте ключ из Umami"
+					/>
+				</div>
+				<div class="form-group">
+					<label class="form-label">Website ID</label>
+					<input
+						type="text"
+						id="umami-website-id"
+						class="form-input"
+						placeholder="6ea99ce5-33ba-4d44-809a-76f429b7e221"
+					/>
+				</div>
+				<div class="form-actions">
+					<button type="button" class="btn-save" onclick="updateUmamiSettings()">
+						Сохранить настройки Umami
+					</button>
+				</div>
+			</div>
+			<div class="settings-section" style="border-top: 1px solid #e5e7eb; padding-top: 24px">
+				<h4 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600; color: #111827">
+					Показатели
+				</h4>
+				<div style="display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap">
+					<select id="umami-period" class="form-input" style="width: auto">
+						<option value="24">Последние 24 часа</option>
+						<option value="168">Последние 7 дней</option>
+						<option value="720">Последние 30 дней</option>
+					</select>
+					<button type="button" class="btn-save" onclick="loadUmamiStats()">
+						Загрузить статистику
+					</button>
+				</div>
+				<div
+					id="umami-stats-cards"
+					style="
+						display: grid;
+						grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+						gap: 16px;
+						margin-bottom: 24px;
+					"
+				>
+					<div
+						class="umami-card"
+						style="
+							background: #f9fafb;
+							border-radius: 8px;
+							padding: 16px;
+							border: 1px solid #e5e7eb;
+						"
+					>
+						<h5 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: #6b7280">
+							Посетители
+						</h5>
+						<p
+							id="umami-visitors"
+							style="margin: 0; font-size: 24px; font-weight: 700; color: #111827"
+						>
+							—
+						</p>
+					</div>
+					<div
+						class="umami-card"
+						style="
+							background: #f9fafb;
+							border-radius: 8px;
+							padding: 16px;
+							border: 1px solid #e5e7eb;
+						"
+					>
+						<h5 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: #6b7280">
+							Просмотры
+						</h5>
+						<p
+							id="umami-pageviews"
+							style="margin: 0; font-size: 24px; font-weight: 700; color: #111827"
+						>
+							—
+						</p>
+					</div>
+				</div>
+				<h5 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #111827">
+					По странам
+				</h5>
+				<div
+					id="umami-countries-container"
+					style="max-height: 400px; overflow: auto; border: 1px solid #e5e7eb; border-radius: 8px"
+				>
+					<table id="umami-countries-table" style="width: 100%; border-collapse: collapse">
+						<thead>
+							<tr style="background: #f9fafb">
+								<th
+									style="
+										text-align: left;
+										padding: 10px 12px;
+										font-size: 12px;
+										font-weight: 600;
+										color: #6b7280;
+									"
+								>
+									Страна (код)
+								</th>
+								<th
+									style="
+										text-align: right;
+										padding: 10px 12px;
+										font-size: 12px;
+										font-weight: 600;
+										color: #6b7280;
+									"
+								>
+									Визиты
+								</th>
+							</tr>
+						</thead>
+						<tbody id="umami-countries-tbody"></tbody>
+					</table>
+				</div>
+				<p
+					id="umami-stats-error"
+					style="margin: 12px 0 0 0; font-size: 14px; color: #dc2626; display: none"
+				></p>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="notification" class="notification">Успешно сохранено</div>
+
+<style>
+	.modal {
+		display: none;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1000;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.modal::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.5);
+	}
+
+	.modal.show {
+		display: flex;
+	}
+
+	.modal-content {
+		position: relative;
+		z-index: 1;
+		background: #ffffff;
+		border-radius: 12px;
+		box-shadow:
+			0 20px 25px -5px rgba(0, 0, 0, 0.1),
+			0 10px 10px -5px rgba(0, 0, 0, 0.04);
+		max-width: 600px;
+		width: 90%;
+		max-height: 90vh;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.modal-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 20px 24px;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.modal-body {
+		padding: 24px;
+		overflow-y: auto;
+		flex: 1;
+	}
+
+	.modal-footer {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+		padding: 20px 24px;
+		border-top: 1px solid #e5e7eb;
+		background: #f9fafb;
+	}
+</style>
+
+<script src="/admin-static/js/admin-panel.js"></script>
+
+<script>
+	function showNotification(message, isError = false) {
+		const notification = document.getElementById('notification');
+		notification.textContent = message;
+		notification.style.backgroundColor = isError ? '#dc2626' : '#10b981';
+		notification.classList.add('show');
+
+		setTimeout(() => {
+			notification.classList.remove('show');
+		}, 3000);
+	}
+
+	async function loadUmamiSettings() {
+		try {
+			const response = await fetch('/admin/api/settings');
+			const data = await response.json();
+			if (data.success) {
+				if (data.umami) {
+					document.getElementById('umami-api-key').value = data.umami.api_key || '';
+					document.getElementById('umami-website-id').value =
+						data.umami.website_id || '6ea99ce5-33ba-4d44-809a-76f429b7e221';
+				}
+			}
+		} catch (error) {
+			console.error('Error loading settings:', error);
+			showNotification('Ошибка при загрузке настроек', true);
+		}
+	}
+
+	async function updateUmamiSettings() {
+		try {
+			const apiKey = document.getElementById('umami-api-key').value.trim();
+			const websiteId =
+				document.getElementById('umami-website-id').value.trim() ||
+				'6ea99ce5-33ba-4d44-809a-76f429b7e221';
+			const response = await fetch('/admin/api/settings', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: JSON.stringify({
+					umami: { api_key: apiKey, website_id: websiteId },
+				}),
+			});
+			const data = await response.json();
+			if (data.success) {
+				showNotification('Настройки Umami сохранены');
+			} else {
+				showNotification(data.message || 'Ошибка сохранения', true);
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			showNotification('Ошибка при сохранении настроек Umami', true);
+		}
+	}
+
+	async function loadUmamiStats() {
+		const errEl = document.getElementById('umami-stats-error');
+		errEl.style.display = 'none';
+		const hours = parseInt(document.getElementById('umami-period').value, 10) || 24;
+		const endAt = Date.now();
+		const startAt = endAt - hours * 60 * 60 * 1000;
+		try {
+			const [statsRes, metricsRes] = await Promise.all([
+				fetch('/admin/api/umami/stats?startAt=' + startAt + '&endAt=' + endAt),
+				fetch('/admin/api/umami/metrics?startAt=' + startAt + '&endAt=' + endAt + '&type=country'),
+			]);
+			if (!statsRes.ok) {
+				const errData = await statsRes.json().catch(() => ({}));
+				throw new Error(
+					errData.error || 'Не удалось загрузить статистику. Укажите API Key в настройках Umami.',
+				);
+			}
+			if (!metricsRes.ok) {
+				const errData = await metricsRes.json().catch(() => ({}));
+				throw new Error(errData.error || 'Не удалось загрузить метрики по странам.');
+			}
+			const stats = await statsRes.json();
+			const countries = await metricsRes.json();
+			document.getElementById('umami-visitors').textContent =
+				typeof stats.visitors === 'number'
+					? stats.visitors
+					: (stats.visitors && stats.visitors.value) || '—';
+			document.getElementById('umami-pageviews').textContent =
+				typeof stats.pageviews === 'number'
+					? stats.pageviews
+					: (stats.pageviews && stats.pageviews.value) || '—';
+			const tbody = document.getElementById('umami-countries-tbody');
+			tbody.innerHTML = '';
+			if (Array.isArray(countries) && countries.length > 0) {
+				countries.forEach(function (row) {
+					const tr = document.createElement('tr');
+					tr.style.borderBottom = '1px solid #e5e7eb';
+					tr.innerHTML =
+						'<td style="padding: 10px 12px; font-size: 14px;">' +
+						(row.x || row.name || '') +
+						'</td><td style="text-align: right; padding: 10px 12px; font-size: 14px;">' +
+						(row.y != null ? row.y : row.visitors || 0) +
+						'</td>';
+					tbody.appendChild(tr);
+				});
+			} else {
+				const tr = document.createElement('tr');
+				tr.innerHTML =
+					'<td colspan="2" style="padding: 16px; text-align: center; color: #6b7280;">Нет данных за выбранный период</td>';
+				tbody.appendChild(tr);
+			}
+		} catch (error) {
+			errEl.textContent = error.message || 'Ошибка загрузки статистики';
+			errEl.style.display = 'block';
+			document.getElementById('umami-visitors').textContent = '—';
+			document.getElementById('umami-pageviews').textContent = '—';
+			document.getElementById('umami-countries-tbody').innerHTML = '';
+		}
+	}
+
+	// Shipments page functions
+	let shipmentsProducts = [];
+
+	async function loadShipmentsPage() {
+		try {
+			const response = await fetch('/admin/api/pages/shipments');
+			const data = await response.json();
+			if (data.success) {
+				document.getElementById('shipments-top-text').value = data.top_text || '';
+				document.getElementById('shipments-bottom-text').value = data.bottom_text || '';
+				shipmentsProducts = data.products || [];
+				renderShipmentsProducts();
+			}
+		} catch (error) {
+			console.error('Error loading shipments page:', error);
+			showNotification('Ошибка при загрузке страницы', true);
+		}
+	}
+
+	function renderShipmentsProducts() {
+		const container = document.getElementById('shipments-products-list');
+		if (!container) return;
+		
+		if (shipmentsProducts.length === 0) {
+			container.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 20px;">Товары не добавлены</p>';
+			return;
+		}
+
+		container.innerHTML = shipmentsProducts.map(function (product, index) {
+			const prices = Array.isArray(product.prices) ? product.prices : [];
+			return `
+			<div class="link-item">
+				<div class="link-fields">
+					<div class="link-field">
+						<label>Название</label>
+						<input type="text" value="${escapeHtml(product.name || '')}" onchange="shipmentsProducts[${index}].name = this.value" />
+					</div>
+					<div class="link-field link-field--full">
+						<label>Описание</label>
+						<textarea class="form-input link-field-description" rows="4" onchange="shipmentsProducts[${index}].description = this.value">${escapeHtml(product.description || '')}</textarea>
+					</div>
+					<div class="link-field">
+						<label>Изображение</label>
+						<div class="product-image-upload" onclick="document.getElementById('shipments-product-image-input-${index}').click()">
+							<input
+								type="file"
+								id="shipments-product-image-input-${index}"
+								accept="image/*"
+								style="display: none"
+								onchange="handleProductImageSelect(event, 'shipments', ${index})"
+							/>
+							${
+								product.image_path
+									? `<img src="${product.image_path}" alt="Товар" style="max-width: 120px; max-height: 120px; border-radius: 8px; object-fit: cover;" />`
+									: '<span style="font-size: 13px; color: #6b7280;">Нажмите, чтобы загрузить изображение</span>'
+							}
+						</div>
+					</div>
+					<div class="link-field">
+						<label>Прейскурант (вес — цена)</label>
+						<div class="product-prices">
+							${
+								prices.length === 0
+									? '<p style="color: #9ca3af; font-size: 13px; margin: 0 0 8px 0;">Пока нет вариантов. Добавьте первый.</p>'
+									: prices
+											.map(
+												(price, pIndex) => `
+								<div class="product-price-row">
+									<input
+										type="text"
+										placeholder="Вес (например, 1 кг)"
+										value="${escapeHtml(price.weight || '')}"
+										onchange="updateProductPrice('shipments', ${index}, ${pIndex}, 'weight', this.value)"
+									/>
+									<input
+										type="text"
+										placeholder="Цена (например, 1 000 ₽)"
+										value="${escapeHtml(price.price || '')}"
+										onchange="updateProductPrice('shipments', ${index}, ${pIndex}, 'price', this.value)"
+									/>
+									<button type="button" class="btn-remove" onclick="removeProductPrice('shipments', ${index}, ${pIndex})">
+										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+										</svg>
+									</button>
+								</div>
+							`
+											)
+											.join('')
+							}
+							<button type="button" class="btn-save" style="margin-top: 8px;" onclick="addProductPrice('shipments', ${index})">
+								+ Добавить вариант
+							</button>
+						</div>
+					</div>
+				</div>
+				<button class="btn-remove" onclick="removeShipmentsProduct(${index})">
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+					</svg>
+				</button>
+			</div>
+		`}).join('');
+	}
+
+	function addShipmentsProduct() {
+		shipmentsProducts.push({ name: '', description: '', image_path: '', prices: [] });
+		renderShipmentsProducts();
+	}
+
+	function removeShipmentsProduct(index) {
+		shipmentsProducts.splice(index, 1);
+		renderShipmentsProducts();
+	}
+
+	async function saveShipmentsPage() {
+		try {
+			const response = await fetch('/admin/api/pages/shipments', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: JSON.stringify({
+					top_text: document.getElementById('shipments-top-text').value,
+					bottom_text: document.getElementById('shipments-bottom-text').value,
+					products: shipmentsProducts
+				}),
+			});
+			const data = await response.json();
+			if (data.success) {
+				showNotification('Страница "Отправки" успешно сохранена');
+			} else {
+				showNotification(data.message || 'Ошибка сохранения', true);
+			}
+		} catch (error) {
+			console.error('Error saving shipments page:', error);
+			showNotification('Ошибка при сохранении страницы', true);
+		}
+	}
+
+	// Wholesale page functions
+	let wholesaleProducts = [];
+
+	async function loadWholesalePage() {
+		try {
+			const response = await fetch('/admin/api/pages/wholesale');
+			const data = await response.json();
+			if (data.success) {
+				document.getElementById('wholesale-top-text').value = data.top_text || '';
+				document.getElementById('wholesale-bottom-text').value = data.bottom_text || '';
+				wholesaleProducts = data.products || [];
+				renderWholesaleProducts();
+			}
+		} catch (error) {
+			console.error('Error loading wholesale page:', error);
+			showNotification('Ошибка при загрузке страницы', true);
+		}
+	}
+
+	function renderWholesaleProducts() {
+		const container = document.getElementById('wholesale-products-list');
+		if (!container) return;
+		
+		if (wholesaleProducts.length === 0) {
+			container.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 20px;">Товары не добавлены</p>';
+			return;
+		}
+
+		container.innerHTML = wholesaleProducts.map(function (product, index) {
+			const prices = Array.isArray(product.prices) ? product.prices : [];
+			return `
+			<div class="link-item">
+				<div class="link-fields">
+					<div class="link-field">
+						<label>Название</label>
+						<input type="text" value="${escapeHtml(product.name || '')}" onchange="wholesaleProducts[${index}].name = this.value" />
+					</div>
+					<div class="link-field link-field--full">
+						<label>Описание</label>
+						<textarea class="form-input link-field-description" rows="4" onchange="wholesaleProducts[${index}].description = this.value">${escapeHtml(product.description || '')}</textarea>
+					</div>
+					<div class="link-field">
+						<label>Изображение</label>
+						<div class="product-image-upload" onclick="document.getElementById('wholesale-product-image-input-${index}').click()">
+							<input
+								type="file"
+								id="wholesale-product-image-input-${index}"
+								accept="image/*"
+								style="display: none"
+								onchange="handleProductImageSelect(event, 'wholesale', ${index})"
+							/>
+							${
+								product.image_path
+									? `<img src="${product.image_path}" alt="Товар" style="max-width: 120px; max-height: 120px; border-radius: 8px; object-fit: cover;" />`
+									: '<span style="font-size: 13px; color: #6b7280;">Нажмите, чтобы загрузить изображение</span>'
+							}
+						</div>
+					</div>
+					<div class="link-field">
+						<label>Прейскурант (вес — цена)</label>
+						<div class="product-prices">
+							${
+								prices.length === 0
+									? '<p style="color: #9ca3af; font-size: 13px; margin: 0 0 8px 0;">Пока нет вариантов. Добавьте первый.</p>'
+									: prices
+											.map(
+												(price, pIndex) => `
+								<div class="product-price-row">
+									<input
+										type="text"
+										placeholder="Вес (например, 5 кг)"
+										value="${escapeHtml(price.weight || '')}"
+										onchange="updateProductPrice('wholesale', ${index}, ${pIndex}, 'weight', this.value)"
+									/>
+									<input
+										type="text"
+										placeholder="Цена (например, 10 000 ₽)"
+										value="${escapeHtml(price.price || '')}"
+										onchange="updateProductPrice('wholesale', ${index}, ${pIndex}, 'price', this.value)"
+									/>
+									<button type="button" class="btn-remove" onclick="removeProductPrice('wholesale', ${index}, ${pIndex})">
+										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+										</svg>
+									</button>
+								</div>
+							`
+											)
+											.join('')
+							}
+							<button type="button" class="btn-save" style="margin-top: 8px;" onclick="addProductPrice('wholesale', ${index})">
+								+ Добавить вариант
+							</button>
+						</div>
+					</div>
+				</div>
+				<button class="btn-remove" onclick="removeWholesaleProduct(${index})">
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+					</svg>
+				</button>
+			</div>
+		`}).join('');
+	}
+
+	function addWholesaleProduct() {
+		wholesaleProducts.push({ name: '', description: '', image_path: '', prices: [] });
+		renderWholesaleProducts();
+	}
+
+	function removeWholesaleProduct(index) {
+		wholesaleProducts.splice(index, 1);
+		renderWholesaleProducts();
+	}
+
+	async function saveWholesalePage() {
+		try {
+			const response = await fetch('/admin/api/pages/wholesale', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: JSON.stringify({
+					top_text: document.getElementById('wholesale-top-text').value,
+					bottom_text: document.getElementById('wholesale-bottom-text').value,
+					products: wholesaleProducts
+				}),
+			});
+			const data = await response.json();
+			if (data.success) {
+				showNotification('Страница "Опт кладами" успешно сохранена');
+			} else {
+				showNotification(data.message || 'Ошибка сохранения', true);
+			}
+		} catch (error) {
+			console.error('Error saving wholesale page:', error);
+			showNotification('Ошибка при сохранении страницы', true);
+		}
+	}
+
+	// Promotions page functions
+	let promotionsProducts = [];
+	let promotionsImagePath = '';
+
+	async function loadPromotionsPage() {
+		try {
+			const response = await fetch('/admin/api/promotions');
+			const data = await response.json();
+			if (data.success) {
+				document.getElementById('promotions-text').value = data.text || '';
+				promotionsImagePath = data.image_path || '';
+				promotionsProducts = data.products || [];
+				renderPromotionsProducts();
+				if (promotionsImagePath) {
+					showPromotionsImagePreview(promotionsImagePath);
+				}
+			}
+		} catch (error) {
+			console.error('Error loading promotions page:', error);
+			showNotification('Ошибка при загрузке страницы', true);
+		}
+	}
+
+	function renderPromotionsProducts() {
+		const container = document.getElementById('promotions-products-list');
+		if (!container) return;
+		
+		if (promotionsProducts.length === 0) {
+			container.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 20px;">Товары не добавлены</p>';
+			return;
+		}
+
+		container.innerHTML = promotionsProducts.map(function (product, index) {
+			const prices = Array.isArray(product.prices) ? product.prices : [];
+			return `
+			<div class="link-item">
+				<div class="link-fields">
+					<div class="link-field">
+						<label>Название</label>
+						<input type="text" value="${escapeHtml(product.name || '')}" onchange="promotionsProducts[${index}].name = this.value" />
+					</div>
+					<div class="link-field link-field--full">
+						<label>Описание</label>
+						<textarea class="form-input link-field-description" rows="4" onchange="promotionsProducts[${index}].description = this.value">${escapeHtml(product.description || '')}</textarea>
+					</div>
+					<div class="link-field">
+						<label>Изображение</label>
+						<div class="product-image-upload" onclick="document.getElementById('promotions-product-image-input-${index}').click()">
+							<input
+								type="file"
+								id="promotions-product-image-input-${index}"
+								accept="image/*"
+								style="display: none"
+								onchange="handleProductImageSelect(event, 'promotions', ${index})"
+							/>
+							${
+								product.image_path
+									? `<img src="${product.image_path}" alt="Товар" style="max-width: 120px; max-height: 120px; border-radius: 8px; object-fit: cover;" />`
+									: '<span style="font-size: 13px; color: #6b7280;">Нажмите, чтобы загрузить изображение</span>'
+							}
+						</div>
+					</div>
+					<div class="link-field">
+						<label>Прейскурант (вес — цена)</label>
+						<div class="product-prices">
+							${
+								prices.length === 0
+									? '<p style="color: #9ca3af; font-size: 13px; margin: 0 0 8px 0;">Пока нет вариантов. Добавьте первый.</p>'
+									: prices
+											.map(
+												(price, pIndex) => `
+								<div class="product-price-row">
+									<input
+										type="text"
+										placeholder="Вес"
+										value="${escapeHtml(price.weight || '')}"
+										onchange="updateProductPrice('promotions', ${index}, ${pIndex}, 'weight', this.value)"
+									/>
+									<input
+										type="text"
+										placeholder="Цена"
+										value="${escapeHtml(price.price || '')}"
+										onchange="updateProductPrice('promotions', ${index}, ${pIndex}, 'price', this.value)"
+									/>
+									<button type="button" class="btn-remove" onclick="removeProductPrice('promotions', ${index}, ${pIndex})">
+										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+										</svg>
+									</button>
+								</div>
+							`
+											)
+											.join('')
+							}
+							<button type="button" class="btn-save" style="margin-top: 8px;" onclick="addProductPrice('promotions', ${index})">
+								+ Добавить вариант
+							</button>
+						</div>
+					</div>
+				</div>
+				<button class="btn-remove" onclick="removePromotionProduct(${index})">
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+					</svg>
+				</button>
+			</div>
+		`}).join('');
+	}
+
+	function addPromotionProduct() {
+		promotionsProducts.push({ name: '', description: '', image_path: '', prices: [] });
+		renderPromotionsProducts();
+	}
+
+	function ensureProductPricesArray(pageType, productIndex) {
+		let listRef;
+		if (pageType === 'shipments') {
+			listRef = shipmentsProducts;
+		} else if (pageType === 'wholesale') {
+			listRef = wholesaleProducts;
+		} else if (pageType === 'promotions') {
+			listRef = promotionsProducts;
+		} else {
+			return;
+		}
+
+		const product = listRef[productIndex];
+		if (!product) return;
+		if (!Array.isArray(product.prices)) {
+			if (product.price) {
+				product.prices = [{ weight: '', price: String(product.price) }];
+			} else {
+				product.prices = [];
+			}
+		}
+	}
+
+	function addProductPrice(pageType, productIndex) {
+		ensureProductPricesArray(pageType, productIndex);
+		let listRef;
+		if (pageType === 'shipments') {
+			listRef = shipmentsProducts;
+		} else if (pageType === 'wholesale') {
+			listRef = wholesaleProducts;
+		} else if (pageType === 'promotions') {
+			listRef = promotionsProducts;
+		} else {
+			return;
+		}
+		listRef[productIndex].prices.push({ weight: '', price: '' });
+		if (pageType === 'shipments') {
+			renderShipmentsProducts();
+		} else if (pageType === 'wholesale') {
+			renderWholesaleProducts();
+		} else if (pageType === 'promotions') {
+			renderPromotionsProducts();
+		}
+	}
+
+	function updateProductPrice(pageType, productIndex, priceIndex, field, value) {
+		ensureProductPricesArray(pageType, productIndex);
+		let listRef;
+		if (pageType === 'shipments') {
+			listRef = shipmentsProducts;
+		} else if (pageType === 'wholesale') {
+			listRef = wholesaleProducts;
+		} else if (pageType === 'promotions') {
+			listRef = promotionsProducts;
+		} else {
+			return;
+		}
+
+		const product = listRef[productIndex];
+		if (!product || !product.prices || !product.prices[priceIndex]) return;
+		product.prices[priceIndex][field] = value;
+	}
+
+	function removeProductPrice(pageType, productIndex, priceIndex) {
+		ensureProductPricesArray(pageType, productIndex);
+		let listRef;
+		if (pageType === 'shipments') {
+			listRef = shipmentsProducts;
+		} else if (pageType === 'wholesale') {
+			listRef = wholesaleProducts;
+		} else if (pageType === 'promotions') {
+			listRef = promotionsProducts;
+		} else {
+			return;
+		}
+		const product = listRef[productIndex];
+		if (!product || !product.prices) return;
+		product.prices.splice(priceIndex, 1);
+		if (pageType === 'shipments') {
+			renderShipmentsProducts();
+		} else if (pageType === 'wholesale') {
+			renderWholesaleProducts();
+		} else if (pageType === 'promotions') {
+			renderPromotionsProducts();
+		}
+	}
+
+	async function handleProductImageSelect(event, pageType, productIndex) {
+		const file = event.target.files[0];
+		if (!file) return;
+		if (!file.type.startsWith('image/')) {
+			showNotification('Выберите файл изображения', true);
+			return;
+		}
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		try {
+			const response = await fetch('/admin/api/upload-product-image', {
+				method: 'POST',
+				headers: {
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: formData,
+			});
+			const data = await response.json();
+			if (!data.success) {
+				showNotification(data.message || 'Ошибка загрузки изображения товара', true);
+				return;
+			}
+
+			let listRef;
+			if (pageType === 'shipments') {
+				listRef = shipmentsProducts;
+			} else if (pageType === 'wholesale') {
+				listRef = wholesaleProducts;
+			} else if (pageType === 'promotions') {
+				listRef = promotionsProducts;
+			} else {
+				return;
+			}
+
+			if (!listRef[productIndex]) return;
+			listRef[productIndex].image_path = data.image_path;
+
+			if (pageType === 'shipments') {
+				renderShipmentsProducts();
+			} else if (pageType === 'wholesale') {
+				renderWholesaleProducts();
+			} else if (pageType === 'promotions') {
+				renderPromotionsProducts();
+			}
+
+			showNotification('Изображение товара загружено');
+		} catch (error) {
+			console.error('Error uploading product image:', error);
+			showNotification('Ошибка при загрузке изображения товара', true);
+		}
+	}
+
+	function removePromotionProduct(index) {
+		promotionsProducts.splice(index, 1);
+		renderPromotionsProducts();
+	}
+
+	function handlePromotionsImageDragOver(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		e.currentTarget.classList.add('dragover');
+	}
+
+	function handlePromotionsImageDragLeave(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		e.currentTarget.classList.remove('dragover');
+	}
+
+	function handlePromotionsImageDrop(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		e.currentTarget.classList.remove('dragover');
+		const files = e.dataTransfer.files;
+		if (files.length > 0) {
+			uploadPromotionsImage(files[0]);
+		}
+	}
+
+	function handlePromotionsImageFileSelect(e) {
+		const file = e.target.files[0];
+		if (file) {
+			uploadPromotionsImage(file);
+		}
+	}
+
+	async function uploadPromotionsImage(file) {
+		if (!file.type.startsWith('image/')) {
+			showNotification('Выберите изображение', true);
+			return;
+		}
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		try {
+			const response = await fetch('/admin/api/upload-promotions-image', {
+				method: 'POST',
+				headers: {
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: formData,
+			});
+
+			const data = await response.json();
+			if (data.success) {
+				promotionsImagePath = data.image_path;
+				showPromotionsImagePreview(data.image_path);
+				showNotification('Изображение загружено');
+			} else {
+				showNotification(data.message || 'Ошибка загрузки изображения', true);
+			}
+		} catch (error) {
+			console.error('Error uploading image:', error);
+			showNotification('Ошибка при загрузке изображения', true);
+		}
+	}
+
+	function showPromotionsImagePreview(imagePath) {
+		const uploadContent = document.getElementById('promotions-image-upload-content');
+		const preview = document.getElementById('promotions-image-preview');
+		const previewImg = document.getElementById('promotions-image-preview-img');
+		
+		if (uploadContent) uploadContent.style.display = 'none';
+		if (preview) preview.style.display = 'block';
+		if (previewImg) previewImg.src = imagePath;
+	}
+
+	function clearPromotionsImagePreview() {
+		const uploadContent = document.getElementById('promotions-image-upload-content');
+		const preview = document.getElementById('promotions-image-preview');
+		
+		promotionsImagePath = '';
+		if (uploadContent) uploadContent.style.display = 'block';
+		if (preview) preview.style.display = 'none';
+	}
+
+	async function savePromotionsPage() {
+		try {
+			const response = await fetch('/admin/api/promotions', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: JSON.stringify({
+					text: document.getElementById('promotions-text').value,
+					image_path: promotionsImagePath,
+					products: promotionsProducts
+				}),
+			});
+			const data = await response.json();
+			if (data.success) {
+				showNotification('Страница "Акции и предложения" успешно сохранена');
+			} else {
+				showNotification(data.message || 'Ошибка сохранения', true);
+			}
+		} catch (error) {
+			console.error('Error saving promotions page:', error);
+			showNotification('Ошибка при сохранении страницы', true);
+		}
+	}
+
+	function escapeHtml(text) {
+		const div = document.createElement('div');
+		div.textContent = text;
+		return div.innerHTML;
+	}
+
+	window.addEventListener('DOMContentLoaded', function () {
+		loadUmamiSettings();
+	});
+</script>
+
+{% endblock %}
+		event.currentTarget.style.background = '#eff6ff';
+	}
+
+	function handleSiteIconDragLeave(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const uploadArea = document.getElementById('site-icon-upload-area');
+		const preview = document.getElementById('site-icon-preview');
+		if (preview.style.display !== 'block') {
+			uploadArea.style.borderColor = '#d1d5db';
+			uploadArea.style.background = '#f9fafb';
+		}
+	}
+
+	function handleSiteIconDrop(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const uploadArea = document.getElementById('site-icon-upload-area');
+		uploadArea.style.borderColor = '#d1d5db';
+		uploadArea.style.background = '#f9fafb';
+
+		const files = event.dataTransfer.files;
+		if (files.length > 0) {
+			uploadSiteIconFile(files[0]);
+		}
+	}
+
+	function handleSiteIconFileSelect(event) {
+		const file = event.target.files[0];
+		if (file) {
+			uploadSiteIconFile(file);
+		}
+	}
+
+	async function uploadSiteIconFile(file) {
+		if (!file.type.startsWith('image/')) {
+			showNotification('Пожалуйста, выберите изображение', true);
+			return;
+		}
+
+		if (file.size > 5 * 1024 * 1024) {
+			showNotification('Размер файла не должен превышать 5MB', true);
+			return;
+		}
+
+		const uploadArea = document.getElementById('site-icon-upload-area');
+		uploadArea.style.opacity = '0.6';
+		uploadArea.style.pointerEvents = 'none';
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		try {
+			const response = await fetch('/admin/api/upload-site-icon', {
+				method: 'POST',
+				body: formData,
+				headers: {
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+			});
+
+			const contentType = response.headers.get('content-type') || '';
+			let data;
+			if (contentType.includes('application/json')) {
+				data = await response.json();
+			} else {
+				const text = await response.text();
+				showNotification('Сервер вернул ошибку. Проверьте размер (макс. 5 МБ) и формат (PNG, JPG, SVG, ICO и т.д.).', true);
+				console.error('Upload site icon non-JSON response:', response.status, text.slice(0, 200));
+				data = { success: false };
+			}
+
+			if (data.success) {
+				showSiteIconPreview(data.icon_path, file.name);
+				showNotification(data.message);
+			} else if (data.message) {
+				showNotification(data.message, true);
+			}
+		} catch (error) {
+			console.error('Error uploading site icon:', error);
+			showNotification('Ошибка при загрузке иконки сайта', true);
+		} finally {
+			uploadArea.style.opacity = '1';
+			uploadArea.style.pointerEvents = 'auto';
+		}
+	}
+
+	async function loadSettings() {
+		await loadSiteIcon();
+		await loadIntroButtonLink();
+		await loadContactUsButtonLink();
+		await loadIntroBackground();
+	}
+
+	async function loadIntroButtonLink() {
+		try {
+			const response = await fetch('/admin/api/intro-button-link');
+			const data = await response.json();
+			if (data.success && data.link) {
+				document.getElementById('intro-button-link').value = data.link;
+			}
+		} catch (error) {
+			console.error('Error loading intro button link:', error);
+		}
+	}
+
+	async function loadContactUsButtonLink() {
+		try {
+			const response = await fetch('/admin/api/contact-us-button-link');
+			const data = await response.json();
+			if (data.success && data.link) {
+				document.getElementById('contact-us-button-link').value = data.link;
+			}
+		} catch (error) {
+			console.error('Error loading contact us button link:', error);
+		}
+	}
+
+	async function updateIntroButtonLink() {
+		const link = document.getElementById('intro-button-link').value.trim();
+
+		if (!link) {
+			showNotification('Ссылка обязательна', true);
+			return;
+		}
+
+		if (
+			!(
+				link.startsWith('#') ||
+				link.startsWith('http://') ||
+				link.startsWith('https://') ||
+				link.startsWith('/')
+			)
+		) {
+			showNotification('Ссылка должна начинаться с #, http://, https:// или /', true);
+			return;
+		}
+
+		try {
+			const response = await fetch('/admin/api/intro-button-link', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: JSON.stringify({
+					link: link,
+				}),
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				showNotification(data.message);
+			} else {
+				showNotification(data.message, true);
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			showNotification('Ошибка при сохранении ссылки', true);
+		}
+	}
+
+	async function updateContactUsButtonLink() {
+		const link = document.getElementById('contact-us-button-link').value.trim();
+
+		if (!link) {
+			showNotification('Ссылка обязательна', true);
+			return;
+		}
+
+		if (
+			!(
+				link.startsWith('#') ||
+				link.startsWith('http://') ||
+				link.startsWith('https://') ||
+				link.startsWith('/')
+			)
+		) {
+			showNotification('Ссылка должна начинаться с #, http://, https:// или /', true);
+			return;
+		}
+
+		try {
+			const response = await fetch('/admin/api/contact-us-button-link', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: JSON.stringify({
+					link: link,
+				}),
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				showNotification(data.message);
+			} else {
+				showNotification(data.message, true);
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			showNotification('Ошибка при сохранении ссылки', true);
+		}
+	}
+
+	function showIntroBackgroundPreview(backgroundPath, backgroundType, fileName) {
+		const uploadArea = document.getElementById('intro-background-upload-area');
+		const uploadContent = document.getElementById('intro-background-upload-content');
+		const preview = document.getElementById('intro-background-preview');
+		const previewContent = document.getElementById('intro-background-preview-content');
+		const previewName = document.getElementById('intro-background-preview-name');
+
+		uploadContent.style.display = 'none';
+		preview.style.display = 'block';
+
+		if (backgroundType === 'video') {
+			previewContent.innerHTML = `<video src="${backgroundPath}" style="max-width: 100%; max-height: 300px; border-radius: 4px;" controls></video>`;
+		} else {
+			previewContent.innerHTML = `<img src="${backgroundPath}" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 4px; object-fit: contain;" />`;
+		}
+
+		previewName.textContent = fileName || backgroundPath.split('/').pop();
+		uploadArea.style.borderColor = '#10b981';
+		uploadArea.style.background = '#f0fdf4';
+	}
+
+	function clearIntroBackgroundPreview(event) {
+		if (event) {
+			event.stopPropagation();
+		}
+
+		const uploadArea = document.getElementById('intro-background-upload-area');
+		const uploadContent = document.getElementById('intro-background-upload-content');
+		const preview = document.getElementById('intro-background-preview');
+		const fileInput = document.getElementById('intro-background-file-input');
+
+		uploadContent.style.display = 'block';
+		preview.style.display = 'none';
+		fileInput.value = '';
+		uploadArea.style.borderColor = '#d1d5db';
+		uploadArea.style.background = '#f9fafb';
+	}
+
+	function handleIntroBackgroundDragOver(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const uploadArea = document.getElementById('intro-background-upload-area');
+		const preview = document.getElementById('intro-background-preview');
+		if (preview.style.display !== 'block') {
+			uploadArea.style.borderColor = '#4f46e5';
+			uploadArea.style.background = '#eef2ff';
+		}
+	}
+
+	function handleIntroBackgroundDragLeave(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const uploadArea = document.getElementById('intro-background-upload-area');
+		const preview = document.getElementById('intro-background-preview');
+		if (preview.style.display !== 'block') {
+			uploadArea.style.borderColor = '#d1d5db';
+			uploadArea.style.background = '#f9fafb';
+		}
+	}
+
+	function handleIntroBackgroundDrop(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const uploadArea = document.getElementById('intro-background-upload-area');
+		uploadArea.style.borderColor = '#d1d5db';
+		uploadArea.style.background = '#f9fafb';
+
+		const files = event.dataTransfer.files;
+		if (files.length > 0) {
+			uploadIntroBackgroundFile(files[0]);
+		}
+	}
+
+	function handleIntroBackgroundFileSelect(event) {
+		const file = event.target.files[0];
+		if (file) {
+			uploadIntroBackgroundFile(file);
+		}
+	}
+
+	async function uploadIntroBackgroundFile(file) {
+		const isImage = file.type.startsWith('image/');
+		const isVideo = file.type.startsWith('video/');
+
+		if (!isImage && !isVideo) {
+			showNotification('Пожалуйста, выберите изображение или видео', true);
+			return;
+		}
+
+		const maxSize = isVideo ? 100 * 1024 * 1024 : 15 * 1024 * 1024;
+		if (file.size > maxSize) {
+			showNotification(`Размер файла не должен превышать ${isVideo ? '100 МБ' : '15 МБ'}`, true);
+			return;
+		}
+
+		const uploadArea = document.getElementById('intro-background-upload-area');
+		uploadArea.style.opacity = '0.6';
+		uploadArea.style.pointerEvents = 'none';
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		try {
+			const response = await fetch('/admin/api/upload-intro-background', {
+				method: 'POST',
+				body: formData,
+				headers: {
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+			});
+
+			const contentType = response.headers.get('content-type') || '';
+			let data;
+			if (contentType.includes('application/json')) {
+				data = await response.json();
+			} else {
+				const text = await response.text();
+				if (response.status === 413) {
+					showNotification('Файл слишком большой. Максимум 100 МБ для видео, 15 МБ для изображений.', true);
+				} else {
+					showNotification('Сервер вернул ошибку. Проверьте размер и формат файла (MP4, WebM, PNG, JPG и т.д.).', true);
+				}
+				console.error('Upload intro background non-JSON response:', response.status, text.slice(0, 200));
+				data = { success: false };
+			}
+
+			if (data.success) {
+				showIntroBackgroundPreview(data.background_path, data.background_type, file.name);
+				showNotification(data.message);
+			} else if (data.message) {
+				showNotification(data.message, true);
+			}
+		} catch (error) {
+			console.error('Error uploading intro background:', error);
+			showNotification('Ошибка при загрузке фона первой секции', true);
+		} finally {
+			uploadArea.style.opacity = '1';
+			uploadArea.style.pointerEvents = 'auto';
+		}
+	}
+
+	async function loadIntroBackground() {
+		try {
+			const response = await fetch('/admin/api/intro-background');
+			const data = await response.json();
+			if (data.success && data.background_path) {
+				showIntroBackgroundPreview(
+					data.background_path,
+					data.background_type,
+					data.background_path.split('/').pop(),
+				);
+			}
+		} catch (error) {
+			console.error('Error loading intro background:', error);
+		}
+	}
+
+	async function loadSiteIcon() {
+		try {
+			const response = await fetch('/admin/api/site-icon');
+			const data = await response.json();
+			if (data.success && data.icon_path) {
+				showSiteIconPreview(data.icon_path, data.icon_path.split('/').pop());
+			}
+		} catch (error) {
+			console.error('Error loading site icon:', error);
+		}
+	}
+
+	async function loadLinks() {
+		try {
+			const response = await fetch('/admin/api/links');
+			const data = await response.json();
+			if (data.success) {
+				renderLinks(data.links);
+			}
+		} catch (error) {
+			console.error('Error loading links:', error);
+		}
+	}
+
+	function renderLinks(linksList) {
+		const container = document.getElementById('links-list');
+		const counter = document.getElementById('links-counter');
+
+		counter.textContent = `Ссылок: ${linksList.length}`;
+
+		if (linksList.length === 0) {
+			container.innerHTML =
+				'<div style="text-align: center; padding: 40px; color: #9ca3af;"><p style="margin: 0; font-size: 15px;">Нет ссылок</p><p style="margin: 8px 0 0 0; font-size: 13px;">Нажмите "Добавить ссылку" для создания</p></div>';
+			return;
+		}
+
+		const html = linksList
+			.map(
+				(link) => `
+        <div class="button-item" data-id="${
+					link.id
+				}" data-type="links" style="display: grid; grid-template-columns: 40px 1fr 200px auto auto; gap: 12px; align-items: center; padding: 16px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px;">
+            <div class="drag-handle" draggable="true" title="Перетащите для изменения порядка" style="cursor: grab;">⋮⋮</div>
+            <div style="color: #111827; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(
+							link.text,
+						)}</div>
+            <div style="color: #6b7280; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(
+							link.url,
+						)}</div>
+            <div style="color: #6b7280; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(
+							link.icon,
+						)}</div>
+            <button onclick="openLinkModal(${
+							link.id
+						})" class="btn-icon" title="Редактировать" style="padding: 8px 16px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+                <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Редактировать
+            </button>
+            <button onclick="deleteLink(${
+							link.id
+						})" class="btn-remove" title="Удалить" style="margin: 0;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </button>
+        </div>
+    `,
+			)
+			.join('');
+
+		container.innerHTML = html;
+		initDragAndDrop('links');
+	}
+
+	let currentLinkId = null;
+	let currentLinkData = null;
+
+	function showIconPreview(iconPath, fileName) {
+		const uploadArea = document.getElementById('icon-upload-area');
+		const uploadContent = document.getElementById('icon-upload-content');
+		const preview = document.getElementById('icon-preview');
+		const previewImg = document.getElementById('icon-preview-img');
+		const previewName = document.getElementById('icon-preview-name');
+		const iconInput = document.getElementById('modal-link-icon');
+
+		uploadContent.style.display = 'none';
+		preview.style.display = 'block';
+		previewImg.src = iconPath;
+		previewName.textContent = fileName || iconPath.split('/').pop();
+		iconInput.value = iconPath;
+		uploadArea.style.borderColor = '#10b981';
+		uploadArea.style.background = '#f0fdf4';
+	}
+
+	function clearIconPreview(event) {
+		if (event) {
+			event.stopPropagation();
+		}
+		const uploadArea = document.getElementById('icon-upload-area');
+		const uploadContent = document.getElementById('icon-upload-content');
+		const preview = document.getElementById('icon-preview');
+		const iconInput = document.getElementById('modal-link-icon');
+		const fileInput = document.getElementById('icon-file-input');
+
+		uploadContent.style.display = 'block';
+		preview.style.display = 'none';
+		iconInput.value = '';
+		fileInput.value = '';
+		uploadArea.style.borderColor = '#d1d5db';
+		uploadArea.style.background = '#f9fafb';
+	}
+
+	function handleIconDragOver(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		event.currentTarget.style.borderColor = '#3b82f6';
+		event.currentTarget.style.background = '#eff6ff';
+	}
+
+	function handleIconDragLeave(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const uploadArea = document.getElementById('icon-upload-area');
+		const preview = document.getElementById('icon-preview');
+		if (preview.style.display !== 'block') {
+			uploadArea.style.borderColor = '#d1d5db';
+			uploadArea.style.background = '#f9fafb';
+		}
+	}
+
+	function handleIconDrop(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const uploadArea = document.getElementById('icon-upload-area');
+		uploadArea.style.borderColor = '#d1d5db';
+		uploadArea.style.background = '#f9fafb';
+
+		const files = event.dataTransfer.files;
+		if (files.length > 0) {
+			uploadIconFile(files[0]);
+		}
+	}
+
+	function handleIconFileSelect(event) {
+		const file = event.target.files[0];
+		if (file) {
+			uploadIconFile(file);
+		}
+	}
+
+	async function uploadIconFile(file) {
+		if (!file.type.startsWith('image/')) {
+			showNotification('Пожалуйста, выберите изображение', true);
+			return;
+		}
+
+		if (file.size > 5 * 1024 * 1024) {
+			showNotification('Размер файла не должен превышать 5MB', true);
+			return;
+		}
+
+		const uploadArea = document.getElementById('icon-upload-area');
+		uploadArea.style.opacity = '0.6';
+		uploadArea.style.pointerEvents = 'none';
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		try {
+			const response = await fetch('/admin/api/upload-icon', {
+				method: 'POST',
+				body: formData,
+				headers: {
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				showIconPreview(data.icon_path, file.name);
+				showNotification(data.message);
+			} else {
+				showNotification(data.message, true);
+			}
+		} catch (error) {
+			console.error('Error uploading icon:', error);
+			showNotification('Ошибка при загрузке иконки', true);
+		} finally {
+			uploadArea.style.opacity = '1';
+			uploadArea.style.pointerEvents = 'auto';
+		}
+	}
+
+	async function openLinkModal(linkId) {
+		currentLinkId = linkId;
+		const modal = document.getElementById('link-modal');
+		const modalTitle = document.getElementById('link-modal-title');
+		const textInput = document.getElementById('modal-link-text');
+		const urlInput = document.getElementById('modal-link-url');
+		const iconInput = document.getElementById('modal-link-icon');
+
+		if (linkId) {
+			modalTitle.textContent = 'Редактировать ссылку';
+
+			try {
+				const response = await fetch('/admin/api/links');
+				const data = await response.json();
+				if (data.success) {
+					const link = data.links.find((l) => l.id === linkId);
+					if (link) {
+						currentLinkData = link;
+						textInput.value = link.text;
+						urlInput.value = link.url;
+						iconInput.value = link.icon;
+						if (link.icon) {
+							showIconPreview(link.icon, link.icon.split('/').pop());
+						} else {
+							clearIconPreview();
+						}
+					}
+				}
+			} catch (error) {
+				console.error('Error loading link:', error);
+			}
+		} else {
+			modalTitle.textContent = 'Создать ссылку';
+			textInput.value = '';
+			urlInput.value = '';
+			iconInput.value = '';
+			currentLinkData = null;
+			clearIconPreview();
+		}
+
+		modal.classList.add('show');
+	}
+
+	function closeLinkModal() {
+		const modal = document.getElementById('link-modal');
+		modal.classList.remove('show');
+		currentLinkId = null;
+		currentLinkData = null;
+		clearIconPreview();
+	}
+
+	function handleLinkModalClick(event) {
+		if (event.target.id === 'link-modal') {
+			closeLinkModal();
+		}
+	}
+
+	async function saveLinkModal() {
+		const text = document.getElementById('modal-link-text').value.trim();
+		const url = document.getElementById('modal-link-url').value.trim();
+		const icon = document.getElementById('modal-link-icon').value.trim();
+
+		if (!text || !url || !icon) {
+			showNotification('Заполните все обязательные поля', true);
+			return;
+		}
+
+		if (!url.startsWith('http://') && !url.startsWith('https://')) {
+			showNotification('Ссылка должна начинаться с http:// или https://', true);
+			return;
+		}
+
+		try {
+			const method = currentLinkId ? 'PUT' : 'POST';
+			const url_endpoint = currentLinkId ? `/admin/api/links/${currentLinkId}` : '/admin/api/links';
+
+			const response = await fetch(url_endpoint, {
+				method: method,
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: JSON.stringify({
+					text,
+					url,
+					icon,
+					order: currentLinkData ? currentLinkData.order : 0,
+				}),
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				showNotification(data.message);
+				closeLinkModal();
+				loadLinks();
+			} else {
+				showNotification(data.message, true);
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			showNotification('Ошибка при сохранении', true);
+		}
+	}
+
+	async function deleteLink(id) {
+		if (!confirm('Удалить эту ссылку?')) return;
+
+		try {
+			const response = await fetch(`/admin/api/links/${id}`, {
+				method: 'DELETE',
+				headers: {
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				showNotification(data.message);
+				loadLinks();
+			} else {
+				showNotification(data.message, true);
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			showNotification('Ошибка при удалении', true);
+		}
+	}
+
+	async function updateLinksOrder(type) {
+		const items = Array.from(document.querySelectorAll(`.button-item[data-type="${type}"]`));
+		const order = items.map((item) => parseInt(item.dataset.id));
+
+		try {
+			const response = await fetch('/admin/api/links/reorder', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: JSON.stringify({ order }),
+			});
+
+			const data = await response.json();
+
+			if (!data.success) {
+				showNotification(data.message, true);
+				loadLinks();
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			loadLinks();
+		}
+	}
+
+	function debounce(func, delay) {
+		let timeout;
+		return function (...args) {
+			clearTimeout(timeout);
+			timeout = setTimeout(() => func.apply(this, args), delay);
+		};
+	}
+
+	function escapeHtml(text) {
+		const map = {
+			'&': '&amp;',
+			'<': '&lt;',
+			'>': '&gt;',
+			'"': '&quot;',
+			"'": '&#039;',
+		};
+		return text.replace(/[&<>"']/g, (m) => map[m]);
+	}
+
+	let draggedElement = null;
+	let dragType = null;
+
+	function initDragAndDrop(type) {
+		const items = document.querySelectorAll(`.button-item[data-type="${type}"]`);
+
+		items.forEach((item) => {
+			const dragHandle = item.querySelector('.drag-handle');
+
+			dragHandle.addEventListener('dragstart', function (e) {
+				draggedElement = item;
+				dragType = type;
+				item.classList.add('dragging');
+				e.dataTransfer.effectAllowed = 'move';
+				e.dataTransfer.setData('text/html', item.innerHTML);
+			});
+
+			item.addEventListener('dragend', function () {
+				this.classList.remove('dragging');
+				items.forEach((i) => i.classList.remove('drag-over'));
+			});
+
+			item.addEventListener('dragover', function (e) {
+				if (e.preventDefault) {
+					e.preventDefault();
+				}
+				e.dataTransfer.dropEffect = 'move';
+
+				if (draggedElement !== this && dragType === type) {
+					this.classList.add('drag-over');
+				}
+				return false;
+			});
+
+			item.addEventListener('dragleave', function () {
+				this.classList.remove('drag-over');
+			});
+
+			item.addEventListener('drop', async function (e) {
+				if (e.stopPropagation) {
+					e.stopPropagation();
+				}
+
+				if (draggedElement !== this && dragType === type) {
+					const allItems = Array.from(
+						document.querySelectorAll(`.button-item[data-type="${type}"]`),
+					);
+					const draggedIndex = allItems.indexOf(draggedElement);
+					const targetIndex = allItems.indexOf(this);
+
+					if (draggedIndex < targetIndex) {
+						this.parentNode.insertBefore(draggedElement, this.nextSibling);
+					} else {
+						this.parentNode.insertBefore(draggedElement, this);
+					}
+
+					await updateButtonsOrder(type);
+				}
+
+				items.forEach((i) => i.classList.remove('drag-over'));
+				return false;
+			});
+		});
+	}
+
+	async function updateButtonsOrder(type) {
+		if (type === 'links') {
+			await updateLinksOrder(type);
+			return;
+		}
+		if (type === 'work-cards') {
+			await updateWorkCardsOrder(type);
+			return;
+		}
+	}
+
+	let currentWorkCardId = null;
+	let currentWorkCardData = null;
+	let uploadedWorkIconPath = null;
+
+	async function loadWorkCards() {
+		try {
+			const response = await fetch('/admin/api/work-cards');
+			const data = await response.json();
+			if (data.success) {
+				renderWorkCards(data.cards);
+			}
+		} catch (error) {
+			console.error('Error loading work cards:', error);
+		}
+	}
+
+	function renderWorkCards(cardsList) {
+		const container = document.getElementById('work-cards-list');
+		const counter = document.getElementById('work-cards-counter');
+
+		counter.textContent = `Карточек: ${cardsList.length}`;
+
+		if (cardsList.length === 0) {
+			container.innerHTML =
+				'<div style="text-align: center; padding: 40px; color: #9ca3af;"><p style="margin: 0; font-size: 15px;">Нет карточек</p><p style="margin: 8px 0 0 0; font-size: 13px;">Нажмите "Добавить карточку" для создания</p></div>';
+			return;
+		}
+
+		const html = cardsList
+			.map(
+				(card) => `
+			<div class="button-item" data-id="${
+				card.id
+			}" data-type="work-cards" style="display: grid; grid-template-columns: 40px 1fr 200px auto auto; gap: 12px; align-items: center; padding: 16px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px;">
+				<div class="drag-handle" draggable="true" title="Перетащите для изменения порядка" style="cursor: grab;">⋮⋮</div>
+				<div style="color: #111827; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(
+					card.title,
+				)}</div>
+				<div style="color: #6b7280; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(
+					card.link,
+				)}</div>
+				<div style="color: #6b7280; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(
+					card.icon,
+				)}</div>
+				<button onclick="openWorkCardModal(${
+					card.id
+				})" class="btn-icon" title="Редактировать" style="padding: 8px 16px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+					<svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+					</svg>
+					Редактировать
+				</button>
+				<button onclick="deleteWorkCard(${card.id})" class="btn-remove" title="Удалить" style="margin: 0;">
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+					</svg>
+				</button>
+			</div>
+		`,
+			)
+			.join('');
+
+		container.innerHTML = html;
+		initDragAndDrop('work-cards');
+	}
+
+	async function openWorkCardModal(cardId) {
+		currentWorkCardId = cardId;
+		const modal = document.getElementById('work-card-modal');
+		const modalTitle = document.getElementById('work-card-modal-title');
+		const titleInput = document.getElementById('modal-work-card-title');
+		const textInput = document.getElementById('modal-work-card-text');
+		const linkInput = document.getElementById('modal-work-card-link');
+		const iconPathInput = document.getElementById('modal-work-card-icon-path');
+
+		clearWorkIconPreview();
+
+		if (cardId) {
+			modalTitle.textContent = 'Редактировать карточку работы';
+
+			try {
+				const response = await fetch('/admin/api/work-cards');
+				const data = await response.json();
+				if (data.success) {
+					const card = data.cards.find((c) => c.id === cardId);
+					if (card) {
+						currentWorkCardData = card;
+						titleInput.value = card.title;
+						textInput.value = card.text;
+						linkInput.value = card.link;
+						iconPathInput.value = card.icon;
+						showWorkIconPreview(card.icon);
+					}
+				}
+			} catch (error) {
+				console.error('Error loading work card:', error);
+			}
+		} else {
+			modalTitle.textContent = 'Создать карточку работы';
+			titleInput.value = '';
+			textInput.value = '';
+			linkInput.value = '.';
+			iconPathInput.value = '';
+			currentWorkCardData = null;
+			uploadedWorkIconPath = null;
+		}
+
+		updateWorkCardTextCounter();
+		modal.classList.add('show');
+	}
+
+	function updateWorkCardTextCounter() {
+		const textarea = document.getElementById('modal-work-card-text');
+		const counterEl = document.getElementById('work-card-text-counter');
+		if (!textarea || !counterEl) return;
+		const val = textarea.value || '';
+		counterEl.textContent = val.length;
+		counterEl.style.color = '#6b7280';
+	}
+
+	function closeWorkCardModal() {
+		const modal = document.getElementById('work-card-modal');
+		modal.classList.remove('show');
+		currentWorkCardId = null;
+		currentWorkCardData = null;
+		uploadedWorkIconPath = null;
+		clearWorkIconPreview();
+	}
+
+	function handleWorkCardModalClick(event) {
+		if (event.target.id === 'work-card-modal') {
+			closeWorkCardModal();
+		}
+	}
+
+	async function saveWorkCardModal() {
+		const title = document.getElementById('modal-work-card-title').value.trim();
+		const text = document.getElementById('modal-work-card-text').value.trim();
+		const link = document.getElementById('modal-work-card-link').value.trim();
+		const icon = document.getElementById('modal-work-card-icon-path').value.trim();
+
+		if (!title || !text || !link || !icon) {
+			showNotification('Заполните все обязательные поля', true);
+			return;
+		}
+
+		try {
+			const method = currentWorkCardId ? 'PUT' : 'POST';
+			const api_url = currentWorkCardId
+				? `/admin/api/work-cards/${currentWorkCardId}`
+				: '/admin/api/work-cards';
+
+			const response = await fetch(api_url, {
+				method: method,
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: JSON.stringify({
+					title,
+					text,
+					link,
+					icon,
+					order: currentWorkCardData ? currentWorkCardData.order : 0,
+				}),
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				showNotification(data.message);
+				closeWorkCardModal();
+				loadWorkCards();
+			} else {
+				showNotification(data.message, true);
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			showNotification('Ошибка при сохранении', true);
+		}
+	}
+
+	async function deleteWorkCard(id) {
+		if (!confirm('Удалить эту карточку работы?')) return;
+
+		try {
+			const response = await fetch(`/admin/api/work-cards/${id}`, {
+				method: 'DELETE',
+				headers: {
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				showNotification(data.message);
+				loadWorkCards();
+			} else {
+				showNotification(data.message, true);
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			showNotification('Ошибка при удалении', true);
+		}
+	}
+
+	async function updateWorkCardsOrder(type) {
+		const items = Array.from(document.querySelectorAll(`.button-item[data-type="${type}"]`));
+		const order = items.map((item) => parseInt(item.dataset.id));
+
+		try {
+			const response = await fetch('/admin/api/work-cards/reorder', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: JSON.stringify({ order }),
+			});
+
+			const data = await response.json();
+
+			if (!data.success) {
+				showNotification(data.message, true);
+				loadWorkCards();
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			loadWorkCards();
+		}
+	}
+
+	function handleWorkIconDragOver(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		event.currentTarget.style.borderColor = '#3b82f6';
+		event.currentTarget.style.background = '#eff6ff';
+	}
+
+	function handleWorkIconDragLeave(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const uploadArea = document.getElementById('work-icon-upload-area');
+		const preview = document.getElementById('work-icon-preview');
+		if (preview.style.display !== 'block') {
+			uploadArea.style.borderColor = '#d1d5db';
+			uploadArea.style.background = '#f9fafb';
+		}
+	}
+
+	function handleWorkIconDrop(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const uploadArea = document.getElementById('work-icon-upload-area');
+		uploadArea.style.borderColor = '#d1d5db';
+		uploadArea.style.background = '#f9fafb';
+
+		const files = event.dataTransfer.files;
+		if (files.length > 0) {
+			uploadWorkIconFile(files[0]);
+		}
+	}
+
+	function handleWorkIconFileSelect(event) {
+		const file = event.target.files[0];
+		if (file) {
+			uploadWorkIconFile(file);
+		}
+	}
+
+	async function uploadWorkIconFile(file) {
+		if (!file.type.startsWith('image/')) {
+			showNotification('Пожалуйста, выберите изображение', true);
+			return;
+		}
+
+		if (file.size > 5 * 1024 * 1024) {
+			showNotification('Размер файла не должен превышать 5MB', true);
+			return;
+		}
+
+		const uploadArea = document.getElementById('work-icon-upload-area');
+		uploadArea.style.opacity = '0.6';
+		uploadArea.style.pointerEvents = 'none';
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		try {
+			const response = await fetch('/admin/api/upload-work-icon', {
+				method: 'POST',
+				body: formData,
+				headers: {
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				uploadedWorkIconPath = data.icon_path;
+				document.getElementById('modal-work-card-icon-path').value = data.icon_path;
+				showWorkIconPreview(data.icon_path, file.name);
+				showNotification(data.message);
+			} else {
+				showNotification(data.message, true);
+			}
+		} catch (error) {
+			console.error('Error uploading work icon:', error);
+			showNotification('Ошибка при загрузке иконки', true);
+		} finally {
+			uploadArea.style.opacity = '1';
+			uploadArea.style.pointerEvents = 'auto';
+		}
+	}
+
+	function showWorkIconPreview(iconPath, fileName) {
+		const uploadArea = document.getElementById('work-icon-upload-area');
+		const uploadContent = document.getElementById('work-icon-upload-content');
+		const preview = document.getElementById('work-icon-preview');
+		const previewImg = document.getElementById('work-icon-preview-img');
+		const previewName = document.getElementById('work-icon-preview-name');
+
+		uploadContent.style.display = 'none';
+		preview.style.display = 'block';
+		previewImg.src = iconPath;
+		previewName.textContent = fileName || iconPath.split('/').pop();
+		uploadArea.style.borderColor = '#10b981';
+		uploadArea.style.background = '#f0fdf4';
+	}
+
+	function clearWorkIconPreview(event) {
+		if (event) {
+			event.stopPropagation();
+		}
+		const uploadArea = document.getElementById('work-icon-upload-area');
+		const uploadContent = document.getElementById('work-icon-upload-content');
+		const preview = document.getElementById('work-icon-preview');
+		const previewImg = document.getElementById('work-icon-preview-img');
+		const previewName = document.getElementById('work-icon-preview-name');
+		const iconPathInput = document.getElementById('modal-work-card-icon-path');
+		const fileInput = document.getElementById('work-icon-file-input');
+
+		uploadContent.style.display = 'block';
+		preview.style.display = 'none';
+		previewImg.src = '';
+		previewName.textContent = '';
+		iconPathInput.value = '';
+		if (fileInput) fileInput.value = '';
+		uploadArea.style.borderColor = '#d1d5db';
+		uploadArea.style.background = '#f9fafb';
+		uploadedWorkIconPath = null;
+	}
+
+	let cities = [];
+
+	function renderCities() {
+		const container = document.getElementById('cities-list');
+		if (cities.length === 0) {
+			container.innerHTML =
+				'<p style="color: #9ca3af; font-size: 14px;">Нет городов. Добавьте город для установки цен.</p>';
+			return;
+		}
+
+		const html = cities
+			.map(
+				(city, cityIndex) => `
+			<div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px; background: #ffffff;">
+				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+					<input
+						type="text"
+						class="form-input"
+						placeholder="Название города"
+						value="${escapeHtml(city.name)}"
+						onchange="updateCityName(${cityIndex}, this.value)"
+						style="margin: 0; flex: 1; max-width: 300px;"
+					/>
+					<button
+						type="button"
+						onclick="removeCity(${cityIndex})"
+						class="btn-remove"
+						style="margin: 0; padding: 8px 12px;"
+					>
+						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+						</svg>
+					</button>
+				</div>
+				<div style="margin-top: 12px;">
+					<label style="display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: #374151;">Товары и цены для этого города:</label>
+					<div id="city-products-${cityIndex}"></div>
+					<button
+						type="button"
+						onclick="addCityProduct(${cityIndex})"
+						class="btn-save"
+						style="margin-top: 8px; padding: 6px 12px; font-size: 13px;"
+					>
+						+ Добавить товар
+					</button>
+				</div>
+			</div>
+		`,
+			)
+			.join('');
+
+		container.innerHTML = html;
+
+		cities.forEach((city, cityIndex) => {
+			renderCityProducts(cityIndex);
+		});
+	}
+
+	function renderCityProducts(cityIndex) {
+		const container = document.getElementById(`city-products-${cityIndex}`);
+		if (!container) return;
+
+		const city = cities[cityIndex];
+		if (!city || !city.products || city.products.length === 0) {
+			container.innerHTML =
+				'<p style="color: #9ca3af; font-size: 13px; margin: 0;">Нет товаров. Добавьте товар для этого города.</p>';
+			return;
+		}
+
+		const html = city.products
+			.map(
+				(product, productIndex) => `
+			<div style="display: grid; grid-template-columns: 1fr 200px auto; gap: 12px; align-items: center; padding: 12px; background: #f9fafb; border-radius: 6px; margin-bottom: 8px;">
+				<input
+					type="text"
+					class="form-input"
+					placeholder="Название товара"
+					value="${escapeHtml(product.name)}"
+					onchange="updateCityProduct(${cityIndex}, ${productIndex}, 'name', this.value)"
+					style="margin: 0;"
+				/>
+				<input
+					type="number"
+					class="form-input"
+					placeholder="Цена"
+					value="${product.price}"
+					min="0"
+					step="0.01"
+					onchange="updateCityProduct(${cityIndex}, ${productIndex}, 'price', parseFloat(this.value) || 0)"
+					style="margin: 0;"
+				/>
+				<button
+					type="button"
+					onclick="removeCityProduct(${cityIndex}, ${productIndex})"
+					class="btn-remove"
+					style="margin: 0; padding: 8px 12px;"
+				>
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+					</svg>
+				</button>
+			</div>
+		`,
+			)
+			.join('');
+
+		container.innerHTML = html;
+	}
+
+	function addCity() {
+		cities.push({
+			name: '',
+			products: [],
+		});
+		renderCities();
+	}
+
+	function updateCityName(cityIndex, name) {
+		if (cities[cityIndex]) {
+			cities[cityIndex].name = name;
+		}
+	}
+
+	function removeCity(cityIndex) {
+		cities.splice(cityIndex, 1);
+		renderCities();
+	}
+
+	function addCityProduct(cityIndex) {
+		if (cities[cityIndex]) {
+			if (!cities[cityIndex].products) {
+				cities[cityIndex].products = [];
+			}
+			cities[cityIndex].products.push({ name: '', price: 0 });
+			renderCityProducts(cityIndex);
+		}
+	}
+
+	function updateCityProduct(cityIndex, productIndex, field, value) {
+		if (
+			cities[cityIndex] &&
+			cities[cityIndex].products &&
+			cities[cityIndex].products[productIndex]
+		) {
+			cities[cityIndex].products[productIndex][field] = value;
+		}
+	}
+
+	function removeCityProduct(cityIndex, productIndex) {
+		if (cities[cityIndex] && cities[cityIndex].products) {
+			cities[cityIndex].products.splice(productIndex, 1);
+			renderCityProducts(cityIndex);
+		}
+	}
+
+	async function loadCalculatorSettings() {
+		try {
+			const response = await fetch('/admin/api/calculator-settings');
+			const data = await response.json();
+			if (data.success && data.settings) {
+				cities = data.settings.cities || [];
+				const defaultPrice = data.settings.warehouse_price_per_deposit || 4225;
+				document.getElementById('warehouse-price-prikop').value =
+					data.settings.warehouse_price_prikop || defaultPrice;
+				document.getElementById('warehouse-price-magnet').value =
+					data.settings.warehouse_price_magnet || defaultPrice;
+				document.getElementById('weeks-per-month').value = data.settings.weeks_per_month || 4.33;
+				document.getElementById('packing-bonus').value = data.settings.packing_bonus || 1100;
+				document.getElementById('chemist-kg-price').value = data.settings.chemist_kg_price ?? 120000;
+				document.getElementById('carrier-with-weight-price').value =
+					data.settings.carrier_with_weight_price_per_step ?? 100000;
+				document.getElementById('carrier-without-weight-price').value =
+					data.settings.carrier_without_weight_price_per_step ?? 2000;
+				renderCities();
+			}
+		} catch (error) {
+			console.error('Error loading calculator settings:', error);
+		}
+	}
+
+	async function updateCalculatorSettings() {
+		const warehousePricePrikop = parseFloat(
+			document.getElementById('warehouse-price-prikop').value,
+		);
+		const warehousePriceMagnet = parseFloat(
+			document.getElementById('warehouse-price-magnet').value,
+		);
+		const weeksPerMonth = parseFloat(document.getElementById('weeks-per-month').value);
+		const packingBonus = parseFloat(document.getElementById('packing-bonus').value);
+		const chemistKgPrice = parseFloat(document.getElementById('chemist-kg-price').value);
+		const carrierWithWeightPrice = parseFloat(document.getElementById('carrier-with-weight-price').value);
+		const carrierWithoutWeightPrice = parseFloat(document.getElementById('carrier-without-weight-price').value);
+
+		const validCities = cities.filter(
+			(c) => c.name && c.name.trim() && c.products && c.products.length > 0,
+		);
+		if (validCities.length === 0) {
+			showNotification('Добавьте хотя бы один город с товарами', true);
+			return;
+		}
+
+		for (let i = 0; i < validCities.length; i++) {
+			const city = validCities[i];
+			const validCityProducts = city.products.filter(
+				(p) => p.name && p.name.trim() && p.price >= 0,
+			);
+			if (validCityProducts.length === 0) {
+				showNotification(`Город "${city.name}" должен иметь хотя бы один товар`, true);
+				return;
+			}
+			validCities[i].products = validCityProducts;
+		}
+
+		if (isNaN(warehousePricePrikop) || warehousePricePrikop < 0) {
+			showNotification('Цена за клад "прикоп" должна быть положительным числом', true);
+			return;
+		}
+
+		if (isNaN(warehousePriceMagnet) || warehousePriceMagnet < 0) {
+			showNotification('Цена за клад "магнит" должна быть положительным числом', true);
+			return;
+		}
+
+		if (isNaN(weeksPerMonth) || weeksPerMonth <= 0) {
+			showNotification('Количество недель в месяце должно быть положительным числом', true);
+			return;
+		}
+
+		if (isNaN(packingBonus) || packingBonus < 0) {
+			showNotification('Бонус за фасовку должен быть неотрицательным числом', true);
+			return;
+		}
+
+		if (isNaN(chemistKgPrice) || chemistKgPrice < 0) {
+			showNotification('Цена за 1 кг (химик) должна быть неотрицательным числом', true);
+			return;
+		}
+		if (isNaN(carrierWithWeightPrice) || carrierWithWeightPrice < 0) {
+			showNotification('Цена за шаг «с весом» должна быть неотрицательным числом', true);
+			return;
+		}
+		if (isNaN(carrierWithoutWeightPrice) || carrierWithoutWeightPrice < 0) {
+			showNotification('Цена за шаг «без веса» должна быть неотрицательным числом', true);
+			return;
+		}
+
+		try {
+			const response = await fetch('/admin/api/calculator-settings', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: JSON.stringify({
+					cities: validCities,
+					warehouse_price_per_deposit: warehousePricePrikop,
+					warehouse_price_prikop: warehousePricePrikop,
+					warehouse_price_magnet: warehousePriceMagnet,
+					weeks_per_month: weeksPerMonth,
+					packing_bonus: packingBonus,
+					chemist_kg_price: chemistKgPrice,
+					carrier_with_weight_price_per_step: carrierWithWeightPrice,
+					carrier_without_weight_price_per_step: carrierWithoutWeightPrice,
+				}),
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				showNotification(data.message);
+				cities = validCities;
+				renderCities();
+			} else {
+				showNotification(data.message, true);
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			showNotification('Ошибка при сохранении настроек', true);
+		}
+	}
+
+	async function loadUmamiSettings() {
+		try {
+			const response = await fetch('/admin/api/settings');
+			const data = await response.json();
+			if (data.success) {
+				if (data.umami) {
+					document.getElementById('umami-api-key').value = data.umami.api_key || '';
+					document.getElementById('umami-website-id').value =
+						data.umami.website_id || '6ea99ce5-33ba-4d44-809a-76f429b7e221';
+				}
+			}
+		} catch (error) {
+			console.error('Error loading settings:', error);
+			showNotification('Ошибка при загрузке настроек', true);
+		}
+	}
+
+	async function updateUmamiSettings() {
+		try {
+			const apiKey = document.getElementById('umami-api-key').value.trim();
+			const websiteId =
+				document.getElementById('umami-website-id').value.trim() ||
+				'6ea99ce5-33ba-4d44-809a-76f429b7e221';
+			const response = await fetch('/admin/api/settings', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+				body: JSON.stringify({
+					umami: { api_key: apiKey, website_id: websiteId },
+				}),
+			});
+			const data = await response.json();
+			if (data.success) {
+				showNotification('Настройки Umami сохранены');
+			} else {
+				showNotification(data.message || 'Ошибка сохранения', true);
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			showNotification('Ошибка при сохранении настроек Umami', true);
+		}
+	}
+
+	async function loadUmamiStats() {
+		const errEl = document.getElementById('umami-stats-error');
+		errEl.style.display = 'none';
+		const hours = parseInt(document.getElementById('umami-period').value, 10) || 24;
+		const endAt = Date.now();
+		const startAt = endAt - hours * 60 * 60 * 1000;
+		try {
+			const [statsRes, metricsRes] = await Promise.all([
+				fetch('/admin/api/umami/stats?startAt=' + startAt + '&endAt=' + endAt),
+				fetch('/admin/api/umami/metrics?startAt=' + startAt + '&endAt=' + endAt + '&type=country'),
+			]);
+			if (!statsRes.ok) {
+				const errData = await statsRes.json().catch(() => ({}));
+				throw new Error(
+					errData.error || 'Не удалось загрузить статистику. Укажите API Key в настройках Umami.',
+				);
+			}
+			if (!metricsRes.ok) {
+				const errData = await metricsRes.json().catch(() => ({}));
+				throw new Error(errData.error || 'Не удалось загрузить метрики по странам.');
+			}
+			const stats = await statsRes.json();
+			const countries = await metricsRes.json();
+			document.getElementById('umami-visitors').textContent =
+				typeof stats.visitors === 'number'
+					? stats.visitors
+					: (stats.visitors && stats.visitors.value) || '—';
+			document.getElementById('umami-pageviews').textContent =
+				typeof stats.pageviews === 'number'
+					? stats.pageviews
+					: (stats.pageviews && stats.pageviews.value) || '—';
+			const tbody = document.getElementById('umami-countries-tbody');
+			tbody.innerHTML = '';
+			if (Array.isArray(countries) && countries.length > 0) {
+				countries.forEach(function (row) {
+					const tr = document.createElement('tr');
+					tr.style.borderBottom = '1px solid #e5e7eb';
+					tr.innerHTML =
+						'<td style="padding: 10px 12px; font-size: 14px;">' +
+						(row.x || row.name || '') +
+						'</td><td style="text-align: right; padding: 10px 12px; font-size: 14px;">' +
+						(row.y != null ? row.y : row.visitors || 0) +
+						'</td>';
+					tbody.appendChild(tr);
+				});
+			} else {
+				const tr = document.createElement('tr');
+				tr.innerHTML =
+					'<td colspan="2" style="padding: 16px; text-align: center; color: #6b7280;">Нет данных за выбранный период</td>';
+				tbody.appendChild(tr);
+			}
+		} catch (error) {
+			errEl.textContent = error.message || 'Ошибка загрузки статистики';
+			errEl.style.display = 'block';
+			document.getElementById('umami-visitors').textContent = '—';
+			document.getElementById('umami-pageviews').textContent = '—';
+			document.getElementById('umami-countries-tbody').innerHTML = '';
+		}
+	}
+</script>

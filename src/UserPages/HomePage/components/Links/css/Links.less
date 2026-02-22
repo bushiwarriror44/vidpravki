@@ -1,0 +1,79 @@
+@import '../../../../../css/common/mixins.less';
+
+.find {
+	&__title {
+		.h1-heading;
+	}
+	&__desc {
+		display: flex;
+		flex-direction: column;
+		gap: 15px;
+		&-text {
+			max-width: 760px;
+			.text-secondary;
+
+			&.white {
+				.text-main;
+			}
+		}
+	}
+	&__list {
+		display: flex;
+		gap: 10px;
+		margin-top: 50px;
+		flex-wrap: wrap;
+		@media (max-width: 1376px) {
+			
+			margin-top: 40px;
+		}
+		@media (max-width: 1200px) {
+			
+			margin-top: 35px;
+		}
+		@media (max-width: 768px) {
+			
+			margin-top: 30px;
+		}
+		@media (max-width: 687px) {
+			
+			margin-top: 25px;
+		}
+		&-item {
+			.standard-button-gray;
+			display: block;
+			z-index: 0;
+			background-color: @color-accent;
+			border: none;
+			border-radius: 8px;
+			font-family: @font-family-heading;
+			font-weight: 700;
+
+			&::before {
+				display: none;
+			}
+
+			&-link {
+				display: flex;
+				gap: 10px;
+				align-items: center;
+				color: @color-white;
+				font-family: @font-family-heading;
+				font-weight: 700;
+				text-decoration: none;
+				font-size: 16px;
+
+				&:hover,
+				&:focus,
+				&:active,
+				&:visited {
+					color: @color-white;
+				}
+			}
+		}
+	}
+	&__status {
+		text-align: center;
+		padding: 40px;
+		color: @color-text-muted;
+	}
+}
