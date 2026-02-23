@@ -1435,10 +1435,18 @@
 	}
 
 	async function loadSettings() {
-		await loadSiteIcon();
-		await loadIntroButtonLink();
-		await loadContactUsButtonLink();
-		await loadIntroBackground();
+		if (typeof loadSiteIcon === 'function') {
+			await loadSiteIcon();
+		}
+		if (typeof loadIntroButtonLink === 'function') {
+			await loadIntroButtonLink();
+		}
+		if (typeof loadContactUsButtonLink === 'function') {
+			await loadContactUsButtonLink();
+		}
+		if (typeof loadIntroBackground === 'function') {
+			await loadIntroBackground();
+		}
 	}
 
 	window.addEventListener('DOMContentLoaded', function () {
@@ -1552,10 +1560,18 @@ function handleSiteIconDragLeave(event) {
 	}
 
 	async function loadSettings() {
-		await loadSiteIcon();
-		await loadIntroButtonLink();
-		await loadContactUsButtonLink();
-		await loadIntroBackground();
+		if (typeof loadSiteIcon === 'function') {
+			await loadSiteIcon();
+		}
+		if (typeof loadIntroButtonLink === 'function') {
+			await loadIntroButtonLink();
+		}
+		if (typeof loadContactUsButtonLink === 'function') {
+			await loadContactUsButtonLink();
+		}
+		if (typeof loadIntroBackground === 'function') {
+			await loadIntroBackground();
+		}
 	}
 
 	async function loadIntroButtonLink() {
