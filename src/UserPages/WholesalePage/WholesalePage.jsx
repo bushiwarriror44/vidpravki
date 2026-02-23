@@ -41,7 +41,10 @@ const WholesalePage = () => {
 			<div className="wholesale-page__container">
 				{pageData.top_text && (
 					<section className="wholesale-page__top-text">
-						<h1 className="wholesale-page__headline">{pageData.top_text}</h1>
+						<div
+							className="wholesale-page__headline"
+							dangerouslySetInnerHTML={{ __html: pageData.top_text }}
+						/>
 					</section>
 				)}
 
