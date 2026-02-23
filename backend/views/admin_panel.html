@@ -1297,6 +1297,149 @@
 		div.textContent = text;
 		return div.innerHTML;
 	}
+	
+	// ----- Favicon (site icon) helpers -----
+
+	function handleSiteIconDragOver(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const uploadArea = document.getElementById('site-icon-upload-area');
+		const preview = document.getElementById('site-icon-preview');
+		if (!uploadArea || !preview) return;
+		if (preview.style.display !== 'block') {
+			uploadArea.style.borderColor = '#4f46e5';
+			uploadArea.style.background = '#eef2ff';
+		}
+	}
+
+	function handleSiteIconDragLeave(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const uploadArea = document.getElementById('site-icon-upload-area');
+		const preview = document.getElementById('site-icon-preview');
+		if (!uploadArea || !preview) return;
+		if (preview.style.display !== 'block') {
+			uploadArea.style.borderColor = '#d1d5db';
+			uploadArea.style.background = '#f9fafb';
+		}
+	}
+
+	function handleSiteIconDrop(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const uploadArea = document.getElementById('site-icon-upload-area');
+		if (uploadArea) {
+			uploadArea.style.borderColor = '#d1d5db';
+			uploadArea.style.background = '#f9fafb';
+		}
+
+		const files = event.dataTransfer.files;
+		if (files && files.length > 0) {
+			uploadSiteIconFile(files[0]);
+		}
+	}
+
+	function handleSiteIconFileSelect(event) {
+		const file = event.target.files[0];
+		if (file) {
+			uploadSiteIconFile(file);
+		}
+	}
+
+	async function uploadSiteIconFile(file) {
+		if (!file.type.startsWith('image/')) {
+			showNotification('Пожалуйста, выберите изображение', true);
+			return;
+		}
+
+		if (file.size > 5 * 1024 * 1024) {
+			showNotification('Размер файла не должен превышать 5MB', true);
+			return;
+		}
+
+		const uploadArea = document.getElementById('site-icon-upload-area');
+		if (!uploadArea) return;
+		uploadArea.style.opacity = '0.6';
+		uploadArea.style.pointerEvents = 'none';
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		try {
+			const response = await fetch('/admin/api/upload-site-icon', {
+				method: 'POST',
+				body: formData,
+				headers: {
+					'X-CSRFToken': '{{ csrf_token() }}',
+				},
+			});
+
+			const contentType = response.headers.get('content-type') || '';
+			let data;
+			if (contentType.includes('application/json')) {
+				data = await response.json();
+			} else {
+				const text = await response.text();
+				showNotification(
+					'Сервер вернул ошибку. Проверьте размер (макс. 5 МБ) и формат (PNG, JPG, SVG, ICO и т.д.).',
+					true,
+				);
+				console.error('Upload site icon non-JSON response:', response.status, text.slice(0, 200));
+				data = { success: false };
+			}
+
+			if (data.success) {
+				showSiteIconPreview(data.icon_path, file.name);
+				showNotification(data.message);
+			} else if (data.message) {
+				showNotification(data.message, true);
+			}
+		} catch (error) {
+			console.error('Error uploading site icon:', error);
+			showNotification('Ошибка при загрузке иконки сайта', true);
+		} finally {
+			uploadArea.style.opacity = '1';
+			uploadArea.style.pointerEvents = 'auto';
+		}
+	}
+
+	async function loadSiteIcon() {
+		try {
+			const response = await fetch('/admin/api/site-icon');
+			const data = await response.json();
+			if (data.success && data.icon_path) {
+				showSiteIconPreview(data.icon_path, data.icon_path.split('/').pop());
+			}
+		} catch (error) {
+			console.error('Error loading site icon:', error);
+		}
+	}
+
+	function showSiteIconPreview(iconPath, fileName) {
+		const uploadArea = document.getElementById('site-icon-upload-area');
+		const uploadContent = document.getElementById('site-icon-upload-content');
+		const preview = document.getElementById('site-icon-preview');
+		const previewImg = document.getElementById('site-icon-preview-img');
+		const previewName = document.getElementById('site-icon-preview-name');
+
+		if (!uploadArea || !uploadContent || !preview || !previewImg || !previewName) return;
+
+		uploadContent.style.display = 'none';
+		preview.style.display = 'block';
+
+		previewImg.src = iconPath;
+		previewName.textContent = fileName || iconPath.split('/').pop() || 'favicon';
+
+		uploadArea.style.borderColor = '#10b981';
+		uploadArea.style.background = '#f0fdf4';
+	}
+
+	async function loadSettings() {
+		await loadSiteIcon();
+		await loadIntroButtonLink();
+		await loadContactUsButtonLink();
+		await loadIntroBackground();
+	}
 
 	window.addEventListener('DOMContentLoaded', function () {
 		if (typeof loadSettings === 'function') {
