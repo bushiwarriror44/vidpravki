@@ -8,7 +8,7 @@ import os
 import logging
 import traceback
 
-from models import db, init_all_models
+from models import db, init_all_models, SiteIcon
 from api_routes import api_bp
 from admin_routes import admin_bp
 
@@ -111,6 +111,31 @@ def serve_spa(path):
 @app.route('/uploads/<path:filename>')
 def serve_uploads(filename):
     return send_from_directory(uploads_dir, filename)
+
+
+@app.route('/favicon.ico')
+def favicon():
+    """
+    Возвращает favicon для сайта.
+    1. Если в БД есть кастомная иконка (SiteIcon) — делаем редирект на неё (например, /uploads/site/...)
+    2. Если кастомной нет — пробуем отдать статический favicon.ico из собранного фронтенда.
+    """
+    try:
+        icon = SiteIcon.query.first()
+        if icon and icon.icon_path:
+            # icon_path уже начинается с /uploads/..., просто редиректим
+            return redirect(icon.icon_path)
+    except Exception:
+        # не ломаем сайт, если что-то пошло не так при чтении БД
+        pass
+
+    # Фолбэк: отдать favicon.ico из dist, если он там есть
+    static_favicon = os.path.join(app.static_folder, 'favicon.ico')
+    if os.path.exists(static_favicon):
+        return send_from_directory(app.static_folder, 'favicon.ico')
+
+    # Если ничего нет — пустой ответ
+    return ('', 204)
 
 @app.errorhandler(404)
 def not_found_error(error):

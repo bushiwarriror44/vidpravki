@@ -55,6 +55,17 @@
 
 <div class="tabs-container">
 	<div class="tabs-nav">
+		<button class="tab-button" onclick="switchTab('general')">
+			<svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 4.5c-4.142 0-7.5 3.358-7.5 7.5s3.358 7.5 7.5 7.5 7.5-3.358 7.5-7.5S16.142 4.5 12 4.5zm0 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 4.5c-2.485 0-4.5 1.343-4.5 3v1h9v-1c0-1.657-2.015-3-4.5-3z"
+				/>
+			</svg>
+			Основное
+		</button>
 		<button class="tab-button" onclick="switchTab('shipments')">
 			<svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -99,6 +110,60 @@
 			</svg>
 			Статистика
 		</button>
+	</div>
+
+	<div id="general-tab" class="tab-content">
+		<div class="settings-container">
+			<div class="settings-header">
+				<h3>Основное</h3>
+				<p>Базовые настройки сайта (favicon и ресурсы главной страницы).</p>
+			</div>
+			<div class="settings-section">
+				<div class="form-group">
+					<label class="form-label">Favicon (иконка сайта)</label>
+					<div
+						id="site-icon-upload-area"
+						class="dropzone"
+						ondrop="handleSiteIconDrop(event)"
+						ondragover="handleSiteIconDragOver(event)"
+						ondragleave="handleSiteIconDragLeave(event)"
+						onclick="document.getElementById('site-icon-file-input').click()"
+					>
+						<input
+							type="file"
+							id="site-icon-file-input"
+							accept="image/*"
+							style="display: none"
+							onchange="handleSiteIconFileSelect(event)"
+						/>
+						<div id="site-icon-upload-content" class="dropzone-content">
+							<svg class="dropzone-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M13 11l-2-2m0 0l-2 2m2-2v8"
+								/>
+							</svg>
+							<p>
+								Перетащите изображение сюда или
+								<span class="dropzone-link">выберите файл</span><br />
+								<small style="color: #6b7280;">Поддерживаются PNG, JPG, JPEG, SVG, WEBP, ICO (до 5 МБ)</small>
+							</p>
+						</div>
+						<div id="site-icon-preview" style="display: none;">
+							<div class="file-preview">
+								<img id="site-icon-preview-img" src="" alt="Favicon preview" />
+								<div class="file-preview-text">
+									<div id="site-icon-preview-name"></div>
+									<div style="font-size: 12px; color: #9ca3af;">Нажмите, чтобы заменить иконку</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<div id="shipments-tab" class="tab-content">
@@ -1234,7 +1299,12 @@
 	}
 
 	window.addEventListener('DOMContentLoaded', function () {
-		loadUmamiSettings();
+		if (typeof loadSettings === 'function') {
+			loadSettings();
+		}
+		if (typeof loadUmamiSettings === 'function') {
+			loadUmamiSettings();
+		}
 	});
 </script>
 
@@ -1242,7 +1312,19 @@
 		event.currentTarget.style.background = '#eff6ff';
 	}
 
-	function handleSiteIconDragLeave(event) {
+function handleSiteIconDragOver(event) {
+	event.preventDefault();
+	event.stopPropagation();
+	const uploadArea = document.getElementById('site-icon-upload-area');
+	const preview = document.getElementById('site-icon-preview');
+	if (!uploadArea || !preview) return;
+	if (preview.style.display !== 'block') {
+		uploadArea.style.borderColor = '#4f46e5';
+		uploadArea.style.background = '#eef2ff';
+	}
+}
+
+function handleSiteIconDragLeave(event) {
 		event.preventDefault();
 		event.stopPropagation();
 		const uploadArea = document.getElementById('site-icon-upload-area');
@@ -1614,6 +1696,25 @@
 		} catch (error) {
 			console.error('Error loading site icon:', error);
 		}
+	}
+
+	function showSiteIconPreview(iconPath, fileName) {
+		const uploadArea = document.getElementById('site-icon-upload-area');
+		const uploadContent = document.getElementById('site-icon-upload-content');
+		const preview = document.getElementById('site-icon-preview');
+		const previewImg = document.getElementById('site-icon-preview-img');
+		const previewName = document.getElementById('site-icon-preview-name');
+
+		if (!uploadArea || !uploadContent || !preview || !previewImg || !previewName) return;
+
+		uploadContent.style.display = 'none';
+		preview.style.display = 'block';
+
+		previewImg.src = iconPath;
+		previewName.textContent = fileName || iconPath.split('/').pop() || 'favicon';
+
+		uploadArea.style.borderColor = '#10b981';
+		uploadArea.style.background = '#f0fdf4';
 	}
 
 	async function loadLinks() {
