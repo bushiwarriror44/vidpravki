@@ -63,15 +63,14 @@ export function Navigation() {
 						vidpravki
 					</RouterLink>
 					<ul className="navigation__list">
-						<li className={`navigation__list-item ${activeSection === 'shipments' ? 'active' : ''}`}>
-							<RouterLink
-								className="navigation__list-item-link"
-								to="/"
-								onClick={closeMenu}>
+						<li
+							className={`navigation__list-item ${activeSection === 'shipments' ? 'active' : ''}`}>
+							<RouterLink className="navigation__list-item-link" to="/" onClick={closeMenu}>
 								Отправки
 							</RouterLink>
 						</li>
-						<li className={`navigation__list-item ${activeSection === 'wholesale' ? 'active' : ''}`}>
+						<li
+							className={`navigation__list-item ${activeSection === 'wholesale' ? 'active' : ''}`}>
 							<RouterLink
 								className="navigation__list-item-link"
 								to="/wholesale"
@@ -79,18 +78,29 @@ export function Navigation() {
 								Опт кладами
 							</RouterLink>
 						</li>
-						<li className={`navigation__list-item ${activeSection === 'promotions' ? 'active' : ''}`}>
+						<li
+							className={`navigation__list-item ${activeSection === 'promotions' ? 'active' : ''}`}>
 							<RouterLink
 								className="navigation__list-item-link"
 								to="/promotions"
 								onClick={closeMenu}>
-								Акции и предложения
+								Предзаказы из Европы
 							</RouterLink>
 						</li>
 					</ul>
 					<div className="navigation__burger" onClick={toggleMenu} aria-label="Открыть меню">
-						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+						<svg
+							width="24"
+							height="24"
+							viewBox="0 0 24 24"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg">
+							<path
+								d="M4 6H20M4 12H20M4 18H20"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+							/>
 						</svg>
 					</div>
 				</div>
@@ -115,10 +125,7 @@ export function Navigation() {
 				</button>
 				<ul className="navigation__mobile-menu-list">
 					<li className="navigation__mobile-menu-item">
-						<RouterLink
-							className="navigation__mobile-menu-link"
-							to="/"
-							onClick={closeMenu}>
+						<RouterLink className="navigation__mobile-menu-link" to="/" onClick={closeMenu}>
 							Отправки
 						</RouterLink>
 					</li>
@@ -135,7 +142,7 @@ export function Navigation() {
 							className="navigation__mobile-menu-link"
 							to="/promotions"
 							onClick={closeMenu}>
-							Акции и предложения
+							Предзаказы из Европы
 						</RouterLink>
 					</li>
 				</ul>

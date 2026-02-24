@@ -52,7 +52,7 @@ const PromotionsPage = () => {
 						<div className="promotions-page__image-wrapper">
 							<img
 								src={pageData.image_path}
-								alt="Акции и предложения"
+								alt="Предзаказы из Европы"
 								onError={(e) => {
 									e.currentTarget.style.display = 'none';
 								}}
@@ -104,14 +104,14 @@ const PromotionsPage = () => {
 													</div>
 													<div className="promotions-page__product-prices-body">
 														{prices.map((price, pIndex) => (
-															<div
-																key={pIndex}
-																className="promotions-page__product-price-row"
-															>
+															<div key={pIndex} className="promotions-page__product-price-row">
 																<span className="promotions-page__product-price-weight">
 																	{price.weight || '—'}
 																</span>
-																<span className="promotions-page__product-price-dots" aria-hidden="true" />
+																<span
+																	className="promotions-page__product-price-dots"
+																	aria-hidden="true"
+																/>
 																<span className="promotions-page__product-price-value">
 																	{price.price || '—'}
 																</span>

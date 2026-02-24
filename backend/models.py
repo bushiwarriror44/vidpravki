@@ -509,7 +509,7 @@ def init_promotions_page():
         ]
 
         promotions_page = PromotionsPage(
-            text="Тестовый текст для страницы «Акции и предложения». Отредактируйте его под свои задачи.",
+            text="Тестовый текст для страницы «Предзаказы из Европы». Отредактируйте его под свои задачи.",
             image_path="",
             products=json.dumps(promotions_products, ensure_ascii=False),
         )
