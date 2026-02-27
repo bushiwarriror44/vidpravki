@@ -63,7 +63,7 @@ const PromotionsPage = () => {
 
 				{products.length > 0 && (
 					<section className="promotions-page__products">
-						<h2 className="promotions-page__products-title">Товары по акциям</h2>
+						<h2 className="promotions-page__products-title">Опт товаров из Европы</h2>
 						<div className="promotions-page__products-list">
 							{products.map((product, index) => {
 								const prices = Array.isArray(product.prices) ? product.prices : [];
